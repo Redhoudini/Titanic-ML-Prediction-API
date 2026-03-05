@@ -1,3 +1,8 @@
+#ANSVAR:
+#  Starter to services: web (Flask) og db (Postgres).
+#  Sætter ports, env-vars, volume (så kode ændringer sync’er), og “healthy” check.
+
+
 services:
   web:
     build: .

@@ -1,3 +1,6 @@
+# ANSVAR: Her definerer du dine databaser-tabeller som Python klasser.
+# TrainingRun = opskrift på tabellen training_runs.
+
 from datetime import datetime
 from .db import db
 

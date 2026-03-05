@@ -1,3 +1,9 @@
+# ANSVAR: Dine endpoints:
+# / (hjemmeside/portal)
+# /health, /db-ping (tests)
+# /runs (viser runs)
+# /api/runs (POST: gemmer en ny run i DB)
+
 from flask import Blueprint, jsonify, render_template, request
 from .models import TrainingRun
 from sqlalchemy import text

@@ -1,3 +1,5 @@
+# ANSVAR:Læser miljøvariabler og sætter Flask/SQLAlchemy config.
+
 import os
 
 class Config:

@@ -1,3 +1,7 @@
+# ANSVAR: “Application factory”: bygger Flask-app’en.
+# Loader config, kobler database på, registrerer routes (blueprint), og importerer models.
+
+
 from flask import Flask
 from .config import Config
 from .db import db, migrate

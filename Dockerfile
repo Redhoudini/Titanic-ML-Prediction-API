@@ -1,3 +1,6 @@
+#ANSVAR:
+#Opskrift på hvordan web-containeren bygges: Python 3.12 + install requirements + kopier projekt.
+
 FROM python:3.12-slim
 
 WORKDIR /app
