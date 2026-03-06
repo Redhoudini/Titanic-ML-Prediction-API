@@ -10,7 +10,7 @@ from sqlalchemy import text
 from .db import db
 import joblib
 
-model = joblib.load("ml/titanic_model.pkl")
+model = joblib.load("ml/models/titanic_mlp_pclass_age_drop_missing.pkl")
 
 bp = Blueprint("main", __name__)
 

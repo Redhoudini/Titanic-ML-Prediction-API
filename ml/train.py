@@ -21,14 +21,12 @@ def load_data():
     query = """
         SELECT pclass, age, survived
         FROM titanic_passengers
+        WHERE age IS NOT NULL
     """
 
     df = pd.read_sql(query, conn)
     conn.close()
 
-    df["age"] = df["age"].fillna(
-        df.groupby("pclass")["age"].transform("mean")
-    )
 
     X = df[["pclass", "age"]]
     y = df["survived"]
@@ -85,7 +83,7 @@ def train():
 
     model.fit(X_train, y_train)
 
-    joblib.dump(model, "ml/titanic_model.pkl")
+    joblib.dump(model, "ml/models/titanic_mlp_pclass_age_drop_missing.pkl")
 
     y_pred = model.predict(X_test)
     y_prob = model.predict_proba(X_test)
