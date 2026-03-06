@@ -15,3 +15,13 @@ class TrainingRun(db.Model):
     loss = db.Column(db.Float, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class TitanicPassenger(db.Model):
+    __tablename__ = "titanic_passengers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    passenger_id = db.Column(db.Integer, nullable=False)
+    survived = db.Column(db.Integer, nullable=False)
+    pclass = db.Column(db.Integer, nullable=False)
+    age = db.Column(db.Float, nullable=True)

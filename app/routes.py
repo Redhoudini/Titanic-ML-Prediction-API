@@ -46,3 +46,11 @@ def create_run():
     db.session.commit()
 
     return jsonify(id=run.id), 201
+
+@bp.get("/plot")
+def plot_page():
+    return """
+    <h1>Titanic plot</h1>
+    <img src="/static/titanic_plot.png" alt="Titanic plot" style="max-width: 100%;">
+    <p><a href='/'>Tilbage</a></p>
+    """

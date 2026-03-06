@@ -8,3 +8,7 @@ psycopg2-binary==2.9.9
 
 Flask-Migrate==4.0.7
 flask
+pandas
+scikit-learn
+matplotlib
+joblib
