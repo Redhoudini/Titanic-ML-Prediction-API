@@ -8,6 +8,9 @@ from flask import Blueprint, jsonify, render_template, request
 from .models import TrainingRun
 from sqlalchemy import text
 from .db import db
+import joblib
+
+model = joblib.load("ml/titanic_model.pkl")
 
 bp = Blueprint("main", __name__)
 
@@ -54,3 +57,28 @@ def plot_page():
     <img src="/static/titanic_plot.png" alt="Titanic plot" style="max-width: 100%;">
     <p><a href='/'>Tilbage</a></p>
     """
+
+
+
+@bp.post("/api/predict")
+def predict():
+    data = request.get_json()
+
+    if not data or "pclass" not in data or "age" not in data:
+        return jsonify({"error": "JSON must contain pclass and age"}), 400
+
+    try:
+        pclass = int(data["pclass"])
+        age = float(data["age"])
+    except (ValueError, TypeError):
+        return jsonify({"error": "pclass must be int and age must be number"}), 400
+
+    sample = [[pclass, age]]
+
+    prediction = model.predict(sample)[0]
+    probability = model.predict_proba(sample)[0][1]
+
+    return jsonify({
+        "prediction": int(prediction),
+        "survival_probability": float(probability)
+    })
