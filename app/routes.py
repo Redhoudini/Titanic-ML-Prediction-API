@@ -53,11 +53,19 @@ def create_run():
 @bp.get("/plot")
 def plot_page():
     return """
-    <h1>Titanic plot</h1>
-    <img src="/static/titanic_plot.png" alt="Titanic plot" style="max-width: 100%;">
+    <h1>Titanic plots</h1>
+
+    <h2>Age vs Pclass</h2>
+    <img src="/static/titanic_plot_age_pclass.png" alt="Age vs Pclass" style="max-width: 100%;">
+
+    <h2>Age vs Survived</h2>
+    <img src="/static/titanic_plot_age_survived.png" alt="Age vs Survived" style="max-width: 100%;">
+
+    <h2>Pclass vs Survived</h2>
+    <img src="/static/titanic_plot_pclass_survived.png" alt="Pclass vs Survived" style="max-width: 100%;">
+
     <p><a href='/'>Tilbage</a></p>
     """
-
 
 
 @bp.post("/api/predict")
