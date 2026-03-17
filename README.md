@@ -6,6 +6,12 @@ The application is built using Python and Flask, uses a PostgreSQL database, and
 
 ---
 
+## About
+
+This project was built as part of my learning in backend development, machine learning and containerized applications.
+
+---
+
 ## Demo
 
 Runs locally using Docker.
@@ -38,6 +44,17 @@ Runs locally using Docker.
 - migrations/ → Database migrations
 - Dockerfile → Container setup
 - docker-compose.yml → Multi-container setup
+
+---
+
+## Model
+
+The model is trained using the Titanic dataset and predicts survival based on:
+
+- Passenger class (pclass)
+- Age
+
+The model is a simple machine learning model built using scikit-learn.
 
 ---
 
