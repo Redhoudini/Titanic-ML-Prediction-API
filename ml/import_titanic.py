@@ -9,7 +9,7 @@ DB_CONFIG = {
     "port": "5432"
 }
 
-CSV_PATH = "titanic_train_500_age_passengerclass.csv"
+CSV_PATH = "titanic_800.csv"
 
 
 def import_titanic_data():
@@ -24,7 +24,11 @@ def import_titanic_data():
                 passenger_id INTEGER,
                 survived INTEGER,
                 pclass INTEGER,
-                age FLOAT
+                sex TEXT,
+                age FLOAT,
+                sibsp INTEGER,
+                parch INTEGER,
+                fare FLOAT
             );
         """)
 
@@ -37,14 +41,18 @@ def import_titanic_data():
                     int(row["PassengerId"]),
                     int(row["Survived"]),
                     int(row["Pclass"]),
-                    float(row["Age"]) if row["Age"] else None
+                    (row["Sex"]),
+                    float(row["Age"]) if row["Age"] else None,
+                    int(row["SibSp"]),
+                    int(row["Parch"]),
+                    float(row["Fare"])
                 ))
 
         cur.execute("DELETE FROM titanic_passengers;")
 
         cur.executemany("""
-            INSERT INTO titanic_passengers (passenger_id, survived, pclass, age)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO titanic_passengers (passenger_id, survived, pclass, sex, age, sibsp, parch, fare)
+            VALUES (%s, %s, %s, %s, %s, %s ,%s, %s);
         """, rows)
 
         conn.commit()

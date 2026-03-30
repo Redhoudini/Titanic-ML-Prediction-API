@@ -24,4 +24,8 @@ class TitanicPassenger(db.Model):
     passenger_id = db.Column(db.Integer, nullable=False)
     survived = db.Column(db.Integer, nullable=False)
     pclass = db.Column(db.Integer, nullable=False)
+    sex = db.Column(db.String, nullable=False)
     age = db.Column(db.Float, nullable=True)
+    sibsp = db.Column(db.Integer, nullable=True)
+    parch = db.Column(db.Integer, nullable=True)
+    fare = db.Column(db.Float, nullable=True)
