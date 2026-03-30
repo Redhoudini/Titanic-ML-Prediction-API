@@ -1,4 +1,4 @@
-# ANSVAR: Dine endpoints:
+# ANSVAR: Endpoints:
 # / (hjemmeside/portal)
 # /health, /db-ping (tests)
 # /runs (viser runs)
@@ -10,7 +10,8 @@ from sqlalchemy import text
 from .db import db
 import joblib
 
-model = joblib.load("ml/models/titanic_mlp_pclass_age_drop_missing.pkl")
+model = joblib.load("ml/models/titanic_mlp_800_mean_age_features6.pkl")
+scaler = joblib.load("ml/models/titanic_scaler_mean_age_features6.pkl")
 
 bp = Blueprint("main", __name__)
 
@@ -20,7 +21,6 @@ def health():
 
 @bp.get("/db-ping")
 def db_ping():
-    # Tester bare at DB kan svare
     db.session.execute(text("SELECT 1"))
     return jsonify(db="ok")
 
@@ -31,8 +31,10 @@ def index():
 @bp.get("/runs")
 def runs_page():
     runs = TrainingRun.query.order_by(TrainingRun.created_at.desc()).limit(50).all()
-    # super simpelt HTML-output uden ekstra template:
-    items = "".join([f"<li>#{r.id} {r.model_name} {r.dataset} acc={r.accuracy} loss={r.loss}</li>" for r in runs])
+    items = "".join([
+        f"<li>#{r.id} {r.model_name} {r.dataset} acc={r.accuracy} loss={r.loss}</li>"
+        for r in runs
+    ])
     return f"<h1>Runs</h1><ul>{items}</ul><p><a href='/'>Tilbage</a></p>"
 
 @bp.post("/api/runs")
@@ -50,41 +52,40 @@ def create_run():
 
     return jsonify(id=run.id), 201
 
-@bp.get("/plot")
-def plot_page():
-    return """
-    <h1>Titanic plots</h1>
-
-    <h2>Age vs Pclass</h2>
-    <img src="/static/titanic_plot_age_pclass.png" alt="Age vs Pclass" style="max-width: 100%;">
-
-    <h2>Age vs Survived</h2>
-    <img src="/static/titanic_plot_age_survived.png" alt="Age vs Survived" style="max-width: 100%;">
-
-    <h2>Pclass vs Survived</h2>
-    <img src="/static/titanic_plot_pclass_survived.png" alt="Pclass vs Survived" style="max-width: 100%;">
-
-    <p><a href='/'>Tilbage</a></p>
-    """
-
-
 @bp.post("/api/predict")
 def predict():
     data = request.get_json()
 
-    if not data or "pclass" not in data or "age" not in data:
-        return jsonify({"error": "JSON must contain pclass and age"}), 400
+    if not data or "pclass" not in data or "sex" not in data or "age" not in data:
+        return jsonify({
+            "error": "JSON must contain pclass, sex and age"
+        }), 400
 
     try:
         pclass = int(data["pclass"])
+        sex_raw = str(data["sex"]).strip().lower()
         age = float(data["age"])
+
+        sibsp = int(data.get("sibsp", 0))
+        parch = int(data.get("parch", 0))
+        fare = float(data.get("fare", 32.0))
     except (ValueError, TypeError):
-        return jsonify({"error": "pclass must be int and age must be number"}), 400
+        return jsonify({
+            "error": "Invalid input types"
+        }), 400
 
-    sample = [[pclass, age]]
+    if sex_raw not in ["male", "female"]:
+        return jsonify({
+            "error": "sex must be 'male' or 'female'"
+        }), 400
 
-    prediction = model.predict(sample)[0]
-    probability = model.predict_proba(sample)[0][1]
+    sex = 1 if sex_raw == "male" else 0
+
+    sample = [[pclass, sex, age, sibsp, parch, fare]]
+    sample_scaled = scaler.transform(sample)
+
+    prediction = model.predict(sample_scaled)[0]
+    probability = model.predict_proba(sample_scaled)[0][1]
 
     return jsonify({
         "prediction": int(prediction),

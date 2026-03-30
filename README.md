@@ -1,6 +1,6 @@
 # Titanic ML Prediction API
 
-This project is a machine learning API that predicts whether a Titanic passenger would survive based on features such as passenger class and age.
+This project is a machine learning API that predicts whether a Titanic passenger would survive based on passenger data.
 
 The application is built using Python and Flask, uses a PostgreSQL database, and runs in Docker containers.
 
@@ -9,6 +9,11 @@ The application is built using Python and Flask, uses a PostgreSQL database, and
 ## About
 
 This project was built as part of my learning in backend development, machine learning and containerized applications.
+
+The focus has been on:
+- building a full ML pipeline
+- experimenting with features
+- integrating a trained model into an API
 
 ---
 
@@ -49,12 +54,20 @@ Runs locally using Docker.
 
 ## Model
 
-The model is trained using the Titanic dataset and predicts survival based on:
+The model is an MLPClassifier (neural network) trained on ~800 passengers.
 
-- Passenger class (pclass)
-- Age
+### Features used:
+- pclass (passenger class)
+- sex (encoded: female=0, male=1)
+- age (filled with mean)
+- sibsp (siblings/spouses aboard)
+- parch (parents/children aboard)
+- fare (ticket price)
 
-The model is a simple machine learning model built using scikit-learn.
+### Preprocessing:
+- Missing age values are filled with mean
+- StandardScaler is used to normalize all features
+- Data is split into 80% training / 20% testing
 
 ---
 
@@ -80,34 +93,66 @@ docker-compose up --build
 http://localhost:5000
 ```
 
-## Example API request
+## API Usage
 
-POST request:
+### POST /api/predict
 
+Required fields:
 ```JSON
 {
   "pclass": 3,
+  "sex": "male",
   "age": 25
 }
 ```
 
+Optional fields (defaults used if omitted):
+```JSON
+{
+  "sibsp": 0,
+  "parch": 0,
+  "fare": 32
+}
+```
+
+
+### Example Response
+
+
+
+```JSON
+{
+  "prediction": 0,
+  "survival_probability": 0.23
+}
+```
+
+## Training Runs
+All model runs are stored in the database and can be viewed at:
+
+http://localhost:5000/runs
+
+Each run includes:
+- model name
+- dataset
+- accuracy
+- loss
+
+
 
 ## What I learned
 
-- Building a REST API using Flask
-
-- Training and using a machine learning model
-
-- Integrating a PostgreSQL database
-
-- Using Docker to run multi-container applications
-
-- Structuring a backend project
+- Building a REST API with Flask
+- Training and evaluating ML models
+- Feature engineering and preprocessing
+- Importance of scaling (StandardScaler)
+- Managing experiments and results
+- Running full-stack applications with Docker
 
 
 ## Future improvements
 
-- Improve model accuracy
-- Add input validation
-- Add frontend interface
-
+- Hyperparameter tuning (layers, neurons)
+- Cross-validation instead of fixed split
+- Better feature engineering
+- Frontend interface for predictions

@@ -1,7 +1,6 @@
 import psycopg2
 import pandas as pd
 import joblib
-import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
@@ -21,7 +20,7 @@ def load_data():
     conn = psycopg2.connect(**DB_CONFIG)
 
     query = """
-        SELECT "passenger_id", pclass, age, survived
+        SELECT "passenger_id", survived, pclass, sex, age, sibsp, parch, fare
         FROM titanic_passengers
         ORDER BY "passenger_id"
     """
@@ -59,47 +58,22 @@ def train():
     # x = features
     xdata = data.drop("survived", axis=1).copy()
 
+    # Map køn
+    xdata["sex"] = xdata["sex"].map({"female": 0, "male": 1})
+
     # passenger_id giver normalt ikke mening som feature
     xdata.drop("passenger_id", axis=1, inplace=True)
 
-    # Fill missing age med gennemsnit inden for samme pclass
-    xdata["age"] = xdata.groupby("pclass")["age"].transform(
-        lambda col: col.fillna(col.mean())
-    )
+    # Indsætter gennemsnits alder, hvis age er null
+    xdata["age"] = xdata["age"].fillna(xdata["age"].mean())
 
-    # Plot 1: age vs pclass
-    plt.figure()
-    plt.scatter(xdata["age"], xdata["pclass"], alpha=0.5)
-    plt.xlabel("Age")
-    plt.ylabel("Pclass")
-    plt.title("Age vs Pclass")
-    plt.savefig("app/static/titanic_plot_age_pclass.png")
-    plt.close()
 
-    # Plot 2: age vs survived
-    plt.figure()
-    plt.scatter(xdata["age"], yvalues["survived"], alpha=0.5)
-    plt.xlabel("Age")
-    plt.ylabel("Survived")
-    plt.title("Age vs Survived")
-    plt.savefig("app/static/titanic_plot_age_survived.png")
-    plt.close()
+    print("Rows after preprocessing:", len(xdata))
 
-    # Plot 3: pclass vs survived
-    plt.figure()
-    plt.scatter(xdata["pclass"], yvalues["survived"], alpha=0.5)
-    plt.xlabel("Pclass")
-    plt.ylabel("Survived")
-    plt.title("Pclass vs Survived")
-    plt.savefig("app/static/titanic_plot_pclass_survived.png")
-    plt.close()
-
-    print("Rows after fillna by class:", len(xdata))
-
-    xtrain = xdata.iloc[:400]
-    xtest = xdata.iloc[400:]
-    ytrain = yvalues.iloc[:400]
-    ytest = yvalues.iloc[400:]
+    xtrain = xdata.iloc[:640]
+    xtest = xdata.iloc[640:]
+    ytrain = yvalues.iloc[:640]
+    ytest = yvalues.iloc[640:]
 
     print("xtrain shape:", xtrain.shape)
     print("xtest shape:", xtest.shape)
@@ -121,7 +95,9 @@ def train():
 
     model.fit(xtrain_scaled, ytrain.values.ravel())
 
-    joblib.dump(model, "ml/models/titanic_mlp_mean_age.pkl")
+    joblib.dump(model, "ml/models/titanic_mlp_800_mean_age_features6.pkl")
+
+    joblib.dump(scaler, "ml/models/titanic_scaler_mean_age_features6.pkl")
 
     predictions = model.predict(xtest_scaled)
     probabilities = model.predict_proba(xtest_scaled)
@@ -138,7 +114,7 @@ def train():
     loss = log_loss(ytest, probabilities)
 
     save_training_run(
-        model_name="MLPClassifier_mean_age_by_class_400_rest_scaled",
+        model_name="MLP_800_mean_age_features6_80_20_scaled",
         dataset="titanic_passengers",
         accuracy=float(accuracy),
         loss=float(loss)
