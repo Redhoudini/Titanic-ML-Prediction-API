@@ -67,7 +67,6 @@ def train():
     # Indsætter gennemsnits alder, hvis age er null
     xdata["age"] = xdata["age"].fillna(xdata["age"].mean())
 
-
     print("Rows after preprocessing:", len(xdata))
 
     xtrain = xdata.iloc[:640]
@@ -95,34 +94,39 @@ def train():
 
     model.fit(xtrain_scaled, ytrain.values.ravel())
 
-    joblib.dump(model, "ml/models/titanic_mlp_800_mean_age_features6.pkl")
+    joblib.dump(model, "ml/models/titanic_mlp_800_mean_age_features6_trainacc.pkl")
+    joblib.dump(scaler, "ml/models/titanic_scaler_mean_age_features6_trainacc.pkl")
 
-    joblib.dump(scaler, "ml/models/titanic_scaler_mean_age_features6.pkl")
+    # Predictions på train
+    train_predictions = model.predict(xtrain_scaled)
+    train_accuracy = accuracy_score(ytrain, train_predictions)
 
-    predictions = model.predict(xtest_scaled)
-    probabilities = model.predict_proba(xtest_scaled)
+    # Predictions på test
+    test_predictions = model.predict(xtest_scaled)
+    test_probabilities = model.predict_proba(xtest_scaled)
+    test_accuracy = accuracy_score(ytest, test_predictions)
 
-    matrix = confusion_matrix(ytest, predictions)
+    matrix = confusion_matrix(ytest, test_predictions)
     print("Confusion matrix:")
     print(matrix)
 
     print("Classification report:")
-    print(classification_report(ytest, predictions))
+    print(classification_report(ytest, test_predictions))
 
     tn, fp, fn, tp = matrix.ravel()
-    accuracy = (tp + tn) / (tp + tn + fp + fn)
-    loss = log_loss(ytest, probabilities)
+    loss = log_loss(ytest, test_probabilities)
 
     save_training_run(
-        model_name="MLP_800_mean_age_features6_80_20_scaled",
+        model_name="MLP_800_mean_age_features6_80_20_scaled_trainacc",
         dataset="titanic_passengers",
-        accuracy=float(accuracy),
+        accuracy=float(test_accuracy),
         loss=float(loss)
     )
 
     print("Training færdig")
+    print("Train accuracy:", train_accuracy)
+    print("Test accuracy:", test_accuracy)
     print("TN:", tn, "FP:", fp, "FN:", fn, "TP:", tp)
-    print("Accuracy:", accuracy)
     print("Loss:", loss)
 
 
